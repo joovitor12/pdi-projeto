@@ -26,7 +26,7 @@ def wiener_filter(noisy_img, kernel, K):
     return denoised_img.astype(np.uint8)
 
 # Carregar imagem ruidosa
-noisy_img = cv2.imread('ohma.jpg', 0)
+noisy_img = cv2.imread('lena.png', 0)
 
 # Definir o kernel para o filtro Wiener
 kernel_size = 3

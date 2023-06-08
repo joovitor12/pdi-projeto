@@ -87,7 +87,7 @@ def composite_model(original_img, noise_amplitude, input_signal):
     
     return processed_img.astype(np.uint8)
 
-lena_img = cv2.imread('ohma.jpg', 0)
+lena_img = cv2.imread('lena.png', 0)
 
 # Adicionar ruído à imagem Lena
 noise_amplitude = 0.1
@@ -113,7 +113,7 @@ denoised_new_well = new_model(noisy_img, bistable_noise_amplitude, bistable_inpu
 denoised_composite_multistable = composite_model(noisy_img, bistable_noise_amplitude, bistable_input_signal)
 
 # Exibir as imagens
-fig, axs = plt.subplots(3, 3, figsize=(10, 10))
+fig, axs = plt.subplots(2, 3, figsize=(10, 10))
 fig.suptitle("Comparison of Denoising Methods")
 axs[0, 0].imshow(noisy_img, cmap='gray')
 axs[0, 0].set_title("Noisy Image")

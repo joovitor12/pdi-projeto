@@ -104,7 +104,7 @@ def calculate_cross_correlation(original_img, denoised_img):
 
 
 def main():
-    lena_img = cv2.imread('ohma.jpg', cv2.IMREAD_GRAYSCALE)
+    lena_img = cv2.imread('lena.png', cv2.IMREAD_GRAYSCALE)
 
     noise_intensities = [0.01, 0.05, 0.1, 0.2, 0.5]
     kernel_size = 3

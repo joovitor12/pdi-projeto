@@ -26,7 +26,7 @@ def median_filter(image, kernel_size):
     return filtered_image.astype(np.uint8)
 
 # Carregar a imagem
-image = cv2.imread('./ohma.jpg', 0)
+image = cv2.imread('lena.png', 0)
 
 # Definir o tamanho do kernel
 kernel_size = 3

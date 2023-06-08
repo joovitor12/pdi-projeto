@@ -2,11 +2,23 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cv2
 
-def add_gaussian_noise(image, mean, stddev):
+def add_salt_and_pepper_noise(image, noise_ratio, K):
     noisy_image = image.copy()
-    noise = np.random.normal(mean, stddev, image.shape)
-    noisy_image = np.clip(image + noise, 0, 255).astype(np.uint8)
-    return noisy_image
+    height, width = image.shape[:2]
+    num_pixels = height * width
+    num_noise_pixels = int(noise_ratio * num_pixels)
+
+    # Gerar coordenadas aleatórias para ruído
+    noise_indices = np.random.choice(num_pixels, num_noise_pixels, replace=False)
+    noisy_image = noisy_image.reshape(-1)  # Achatar a imagem para um vetor unidimensional
+
+    # Adicionar ruído salt and pepper
+    noisy_image[noise_indices] = 0  # Salt noise (preto)
+    noisy_image[noise_indices + 1] = 255  # Pepper noise (branco)
+
+    # Redimensionar a imagem de volta à forma original
+    noisy_image = noisy_image.reshape(height, width)
+    return noisy_image.astype(np.uint8)
 
 # Função do modelo bistável
 def bistable_model(image, noise_amplitude, input_signal):
@@ -81,7 +93,7 @@ def calculate_psnr(original_image, processed_image):
     return psnr
 
 # Carregar imagem Lena
-lena_img = cv2.imread('ohma.jpg', 0)
+lena_img = cv2.imread('lena.png', 0)
 
 # Parâmetros
 kernel_size = 3
@@ -93,7 +105,7 @@ mean = 0
 stddev = 50
 
 # Adicionar ruído gaussiano à imagem Lena
-noisy_img = add_gaussian_noise(lena_img, mean, stddev)
+noisy_img = add_salt_and_pepper_noise(lena_img, mean, stddev)
 
 # Inicializar arrays para armazenar resultados
 methods = [bistable_model, new_potential_well_model, composite_multistable_model]

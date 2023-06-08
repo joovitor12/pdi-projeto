@@ -20,7 +20,7 @@ def calculate_psnr(original_img, denoised_img):
     psnr = 20 * np.log10(max_pixel / np.sqrt(mse))
     return psnr
 
-lena_img = cv2.imread('ohma.jpg', 0)
+lena_img = cv2.imread('lena.png', 0)
 
 def bistable_potential(x):
     return x**4 - x**2

@@ -34,7 +34,7 @@ def composite_model(original_img, noise_amplitude, input_signal):
     return processed_img.astype(np.uint8)
 
 # Carregar a imagem
-image = cv2.imread('ohma.jpg', 0)
+image = cv2.imread('lena.png', 0)
 
 # Definir os parâmetros do modelo Composite Multistable
 noise_amplitude = 0.1

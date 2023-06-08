@@ -2,23 +2,25 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cv2
 
-def add_salt_and_pepper_noise(image, noise_ratio, K):
+
+
+def add_gaussian_noise(image, mean, stddev):
     noisy_image = image.copy()
-    height, width = image.shape[:2]
-    num_pixels = height * width
-    num_noise_pixels = int(noise_ratio * num_pixels)
+    noise = np.random.normal(mean, stddev, image.shape)
+    noisy_image = np.clip(image + noise, 0, 255).astype(np.uint8)
+    return noisy_image
 
-    # Gerar coordenadas aleatórias para ruído
-    noise_indices = np.random.choice(num_pixels, num_noise_pixels, replace=False)
-    noisy_image = noisy_image.reshape(-1)  # Achatar a imagem para um vetor unidimensional
+# Função de filtragem de mediana
+def median_filter(image, kernel_size, K):
+    denoised_image = cv2.medianBlur(image, kernel_size)
+    return denoised_image
 
-    # Adicionar ruído salt and pepper
-    noisy_image[noise_indices] = 0  # Salt noise (preto)
-    noisy_image[noise_indices + 1] = 255  # Pepper noise (branco)
+# Função de filtragem de Wiener
+def wiener_filter(image, kernel_size, K):
+    kernel = np.ones((kernel_size, kernel_size), dtype=np.float32) / (kernel_size ** 2)
+    denoised_image = cv2.filter2D(image, -1, kernel)
+    return denoised_image
 
-    # Redimensionar a imagem de volta à forma original
-    noisy_image = noisy_image.reshape(height, width)
-    return noisy_image.astype(np.uint8)
 
 # Função do modelo bistável
 def bistable_model(image, noise_amplitude, input_signal):
@@ -36,6 +38,7 @@ def bistable_snr_model(x, noise_amplitude, K):
     dx = -bistable_potential(x)
     dx += noise_amplitude * np.random.normal(size=x.shape)
     return dx
+
 
 def bistable_potential(x):
     return x**4 - x**2
@@ -56,6 +59,7 @@ def new_potential_well_snr_model(x, noise_amplitude, K):
     dx = -new_potential_well_potential(x)
     dx += noise_amplitude * np.random.normal(size=x.shape)
     return dx
+
 
 def new_potential_well_potential(x):
     return x**3 - x
@@ -86,14 +90,13 @@ def calculate_cross_correlation(original_image, processed_image):
     cross_correlation = np.sum(original_image * processed_image) / np.sqrt(np.sum(original_image ** 2) * np.sum(processed_image ** 2))
     return cross_correlation
 
-# Função para calcular o PSNR
-def calculate_psnr(original_image, processed_image):
-    mse = np.mean((original_image - processed_image) ** 2)
-    psnr = 10 * np.log10(255 ** 2 / mse)
-    return psnr
+# Função para calcular a variância
+def calculate_variance(image):
+    variance = np.var(image)
+    return variance
 
 # Carregar imagem Lena
-lena_img = cv2.imread('ohma.jpg', 0)
+lena_img = cv2.imread('lena.png', 0)
 
 # Parâmetros
 kernel_size = 3
@@ -105,23 +108,26 @@ mean = 0
 stddev = 50
 
 # Adicionar ruído gaussiano à imagem Lena
-noisy_img = add_salt_and_pepper_noise(lena_img, mean, stddev)
+noisy_img = add_gaussian_noise(lena_img, mean, stddev)
 
 # Inicializar arrays para armazenar resultados
-methods = [bistable_model, new_potential_well_model, composite_multistable_model]
-psnr_results = []
+methods = [median_filter, wiener_filter, bistable_model, new_potential_well_model, composite_multistable_model]
+correlation_results = []
+variance_results = []
 
-# Aplicar os métodos de processamento de imagem e calcular o PSNR
+# Aplicar os métodos de processamento de imagem e calcular correlação cruzada e variância
 for method in methods:
-    denoised_img = method(noisy_img, noise_amplitude, input_signal)
-    psnr = calculate_psnr(lena_img, denoised_img)
-    psnr_results.append(psnr)
+    denoised_img = method(noisy_img, kernel_size, K)
+    correlation = calculate_cross_correlation(lena_img, denoised_img)
+    variance = calculate_variance(denoised_img)
+    correlation_results.append(correlation)
+    variance_results.append(variance)
 
-# Criar o gráfico de linhas
-plt.plot(range(len(methods)), psnr_results, marker='o')
-plt.xticks(range(len(methods)), ['Bistable Model', 'New Potential Well Model', 'Composite Multistable Model'])
-plt.xlabel('Models')
-plt.ylabel('PSNR')
-plt.title('Comparison of PSNR of Processed Images')
-plt.grid(True)
+# Exibir resultados em um gráfico
+plt.figure(figsize=(10, 5))
+plt.bar(range(len(methods)), correlation_results, align='center', color='blue', alpha=0.5)
+plt.xticks(range(len(methods)), ['Median', 'Wiener', 'Bistable', 'New Potential Well', 'Composite Multistable'])
+plt.xlabel('Methods')
+plt.ylabel('Cross Correlation')
+plt.title('Comparison of Cross Correlation')
 plt.show()
