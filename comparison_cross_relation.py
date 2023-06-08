@@ -127,7 +127,7 @@ def main():
             if method == wiener_filter:
                 denoised_img = method(noisy_img, np.ones((kernel_size, kernel_size)), K)
             else:
-                denoised_img = method(noisy_img, kernel_size, K)
+                denoised_img = method(noisy_img, kernel_size)
             cross_correlation[i] = calculate_cross_correlation(lena_img, denoised_img)
 
         print(f"Noise Intensity: {intensity}")
@@ -144,7 +144,7 @@ def main():
             if method == wiener_filter:
                 denoised_img = method(noisy_img, np.ones((kernel_size, kernel_size)), K)
             else:
-                denoised_img = method(noisy_img, kernel_size, K)
+                denoised_img = method(noisy_img, kernel_size)
             plt.subplot(2, 3, i + 2)
             plt.imshow(denoised_img, cmap='gray')
             plt.title(method.__name__)
